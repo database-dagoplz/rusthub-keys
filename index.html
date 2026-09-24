@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RustHub - Управление ключами</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* === ШАПКА === */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px 30px;
+            background: rgba(42, 45, 62, 0.6);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .token-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .token-input input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px 15px;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 14px;
+            width: 300px;
+            font-family: 'Consolas', monospace;
+        }
+
+        .token-input input:focus {
+            outline: none;
+            border-color: rgba(120, 140, 200, 0.5);
+        }
+
+        .btn-save-token {
+            background: rgba(100, 120, 180, 0.8);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-save-token:hover {
+            background: rgba(110, 130, 190, 0.9);
+        }
+
+        /* === СТАТИСТИКА === */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(42, 45, 62, 0.6);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 500;
+        }
+
+        .stat-total .stat-value { color: #7888c8; }
+        .stat-active .stat-value { color: #8cdc9c; }
+        .stat-expired .stat-value { color: #f08c8c; }
+        .stat-inactive .stat-value { color: #c8c8c8; }
+
+        /* === КНОПКИ ГЕНЕРАЦИИ === */
+        .generate-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            align-items: center;
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, rgba(100, 120, 180, 0.8), rgba(120, 100, 180, 0.8));
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 16px 32px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 1px;
+        }
+
+        .btn-generate:hover {
+            background: linear-gradient(135deg, rgba(110, 130, 190, 0.9), rgba(130, 110, 190, 0.9));
+            transform: translateY(-2px);
+        }
+
+        .btn-generate:active {
+            transform: translateY(0);
+        }
+
+        .btn-refresh {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 16px 32px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: auto;
+        }
+
+        .btn-refresh:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        /* === ТАБЛИЦА === */
+        .table-container {
+            background: rgba(42, 45, 62, 0.6);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        th {
+            padding: 18px 20px;
+            text-align: left;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        td {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 14px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .key-cell {
+            font-family: 'Consolas', monospace;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 13px;
+        }
+
+        .date-cell {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .status-active {
+            color: rgba(140, 220, 180, 0.9);
+            font-weight: 600;
+        }
+
+        .status-expired {
+            color: rgba(240, 140, 140, 0.8);
+            font-weight: 600;
+        }
+
+        .status-inactive {
+            color: rgba(200, 200, 200, 0.6);
+            font-weight: 600;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-action:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-copy { color: rgba(120, 136, 200, 0.9); }
+        .btn-toggle { color: rgba(140, 220, 180, 0.9); }
+        .btn-delete { color: rgba(240, 140, 140, 0.8); }
+
+        /* === УВЕДОМЛЕНИЯ === */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(42, 45, 62, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px 24px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success { border-left: 4px solid rgba(140, 220, 180, 0.9); }
+        .toast.error { border-left: 4px solid rgba(240, 140, 140, 0.8); }
+
+        /* === ЗАГРУЗКА === */
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 16px;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid rgba(120, 140, 200, 0.8);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* === АДАПТИВНОСТЬ === */
+        @media (max-width: 768px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .generate-section {
+                flex-wrap: wrap;
+            }
+
+            .token-input input {
+                width: 200px;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 12px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ШАПКА -->
+        <div class="header">
+            <h1>🔑 УПРАВЛЕНИЕ КЛЮЧАМИ</h1>
+            <div class="token-input">
+                <input type="password" id="tokenInput" placeholder="GitHub Personal Access Token">
+                <button class="btn-save-token" onclick="saveToken()">Сохранить</button>
+            </div>
+        </div>
+
+        <!-- СТАТИСТИКА -->
+        <div class="stats">
+            <div class="stat-card stat-total">
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-label">Всего ключей</div>
+            </div>
+            <div class="stat-card stat-active">
+                <div class="stat-value" id="statActive">0</div>
+                <div class="stat-label">Активных</div>
+            </div>
+            <div class="stat-card stat-expired">
+                <div class="stat-value" id="statExpired">0</div>
+                <div class="stat-label">Истекло</div>
+            </div>
+            <div class="stat-card stat-inactive">
+                <div class="stat-value" id="statInactive">0</div>
+                <div class="stat-label">Неактивных</div>
+            </div>
+        </div>
+
+        <!-- КНОПКИ ГЕНЕРАЦИИ -->
+        <div class="generate-section">
+            <button class="btn-generate" onclick="generateKey(7)">7 ДНЕЙ</button>
+            <button class="btn-generate" onclick="generateKey(30)">30 ДНЕЙ</button>
+            <button class="btn-generate" onclick="generateKey(90)">90 ДНЕЙ</button>
+            <button class="btn-refresh" onclick="loadData()">🔄 ОБНОВИТЬ</button>
+        </div>
+
+        <!-- ТАБЛИЦА -->
+        <div class="table-container">
+            <div id="loadingState" class="loading">
+                <div class="spinner"></div>
+                Загрузка данных...
+            </div>
+            <table id="keysTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>КЛЮЧ</th>
+                        <th>ИСТЕКАЕТ</th>
+                        <th>СТАТУС</th>
+                        <th>ДЕЙСТВИЯ</th>
+                    </tr>
+                </thead>
+                <tbody id="keysTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- УВЕДОМЛЕНИЕ -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // КОНФИГУРАЦИЯ
+        const REPO_OWNER = 'ТВОЙ_НИК'; // Замени на свой GitHub username
+        const REPO_NAME = 'rusthub-keys';
+        const FILE_PATH = 'keys.json';
+        const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+
+        let keysData = { keys: [] };
+        let authToken = localStorage.getItem('github_token') || '';
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            if (authToken) {
+                document.getElementById('tokenInput').value = authToken;
+                loadData();
+            } else {
+                document.getElementById('loadingState').style.display = 'none';
+                showToast('Введите GitHub Token для начала работы', 'error');
+            }
+        });
+
+        // Сохранить токен
+        function saveToken() {
+            const token = document.getElementById('tokenInput').value.trim();
+            if (token) {
+                authToken = token;
+                localStorage.setItem('github_token', token);
+                showToast('Token сохранён', 'success');
+                loadData();
+            } else {
+                showToast('Введите токен', 'error');
+            }
+        }
+
+        // Загрузить данные
+        async function loadData() {
+            if (!authToken) {
+                showToast('Сначала введите GitHub Token', 'error');
+                return;
+            }
+
+            showLoading(true);
+
+            try {
+                const response = await fetch(API_URL, {
+                    headers: {
+                        'Authorization': `token ${authToken}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+                const content = atob(data.content);
+                keysData = JSON.parse(content);
+
+                updateStats();
+                updateTable();
+                showLoading(false);
+                showToast('Данные загружены', 'success');
+            } catch (error) {
+                showLoading(false);
+                showToast(`Ошибка: ${error.message}`, 'error');
+            }
+        }
+
+        // Обновить статистику
+        function updateStats() {
+            const keys = keysData.keys || [];
+            const now = new Date();
+
+            const total = keys.length;
+            const active = keys.filter(k => k.active).length;
+            const expired = keys.filter(k => {
+                try {
+                    return new Date(k.expires) < now;
+                } catch { return false; }
+            }).length;
+            const inactive = total - active;
+
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statActive').textContent = active;
+            document.getElementById('statExpired').textContent = expired;
+            document.getElementById('statInactive').textContent = inactive;
+        }
+
+        // Обновить таблицу
+        function updateTable() {
+            const tbody = document.getElementById('keysTableBody');
+            tbody.innerHTML = '';
+
+            const keys = keysData.keys || [];
+            const now = new Date();
+
+            keys.forEach((keyData, index) => {
+                const tr = document.createElement('tr');
+
+                // Ключ
+                const keyCell = document.createElement('td');
+                keyCell.className = 'key-cell';
+                keyCell.textContent = keyData.key;
+                tr.appendChild(keyCell);
+
+                // Дата
+                const dateCell = document.createElement('td');
+                dateCell.className = 'date-cell';
+                dateCell.textContent = keyData.expires;
+                tr.appendChild(dateCell);
+
+                // Статус
+                const statusCell = document.createElement('td');
+                let status, statusClass;
+                try {
+                    const expDate = new Date(keyData.expires);
+                    const isExpired = expDate < now;
+
+                    if (!keyData.active) {
+                        status = 'Неактивен';
+                        statusClass = 'status-inactive';
+                    } else if (isExpired) {
+                        status = 'Истёк';
+                        statusClass = 'status-expired';
+                    } else {
+                        status = 'Активен';
+                        statusClass = 'status-active';
+                    }
+                } catch {
+                    status = 'Ошибка';
+                    statusClass = 'status-inactive';
+                }
+
+                statusCell.className = statusClass;
+                statusCell.textContent = status;
+                tr.appendChild(statusCell);
+
+                // Действия
+                const actionsCell = document.createElement('td');
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'actions';
+
+                // Копировать
+                const btnCopy = document.createElement('button');
+                btnCopy.className = 'btn-action btn-copy';
+                btnCopy.textContent = '📋';
+                btnCopy.title = 'Копировать';
+                btnCopy.onclick = () => copyKey(keyData.key);
+                actionsDiv.appendChild(btnCopy);
+
+                // Переключить
+                const btnToggle = document.createElement('button');
+                btnToggle.className = 'btn-action btn-toggle';
+                btnToggle.textContent = keyData.active ? '✓' : '✕';
+                btnToggle.title = keyData.active ? 'Деактивировать' : 'Активировать';
+                btnToggle.onclick = () => toggleKey(index);
+                actionsDiv.appendChild(btnToggle);
+
+                // Удалить
+                const btnDelete = document.createElement('button');
+                btnDelete.className = 'btn-action btn-delete';
+                btnDelete.textContent = '🗑';
+                btnDelete.title = 'Удалить';
+                btnDelete.onclick = () => deleteKey(index);
+                actionsDiv.appendChild(btnDelete);
+
+                actionsCell.appendChild(actionsDiv);
+                tr.appendChild(actionsCell);
+
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('keysTable').style.display = 'table';
+        }
+
+        // Генерировать ключ
+        async function generateKey(days) {
+            if (!authToken) {
+                showToast('Сначала введите GitHub Token', 'error');
+                return;
+            }
+
+            const newKey = generateKeyString(days);
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + days);
+            const expiryStr = expiryDate.toISOString().split('T')[0];
+
+            keysData.keys.push({
+                key: newKey,
+                expires: expiryStr,
+                active: true
+            });
+
+            await saveData();
+            updateStats();
+            updateTable();
+            showToast(`Ключ создан: ${newKey}`, 'success');
+        }
+
+        // Генерация строки ключа
+        function generateKeyString(days) {
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + days);
+            const dateStr = expiryDate.toISOString().split('T')[0].replace(/-/g, '');
+
+            const part1 = Math.random().toString(36).substring(2, 6).toUpperCase();
+            const part2 = Math.random().toString(36).substring(2, 6).toUpperCase();
+
+            return `RUST-${part1}-${dateStr}-${part2}`;
+        }
+
+        // Копировать ключ
+        function copyKey(key) {
+            navigator.clipboard.writeText(key).then(() => {
+                showToast('Ключ скопирован', 'success');
+            }).catch(() => {
+                showToast('Не удалось скопировать', 'error');
+            });
+        }
+
+        // Переключить статус
+        async function toggleKey(index) {
+            keysData.keys[index].active = !keysData.keys[index].active;
+            await saveData();
+            updateStats();
+            updateTable();
+            showToast('Статус изменён', 'success');
+        }
+
+        // Удалить ключ
+        async function deleteKey(index) {
+            if (confirm(`Удалить ключ ${keysData.keys[index].key}?`)) {
+                keysData.keys.splice(index, 1);
+                await saveData();
+                updateStats();
+                updateTable();
+                showToast('Ключ удалён', 'success');
+            }
+        }
+
+        // Сохранить данные в GitHub
+        async function saveData() {
+            try {
+                // Получить текущий SHA
+                const getResponse = await fetch(API_URL, {
+                    headers: {
+                        'Authorization': `token ${authToken}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (!getResponse.ok) throw new Error(`HTTP ${getResponse.status}`);
+
+                const currentData = await getResponse.json();
+                const sha = currentData.sha;
+
+                // Закодировать содержимое
+                const content = JSON.stringify(keysData, null, 2);
+                const contentBase64 = btoa(content);
+
+                // Отправить обновление
+                const putResponse = await fetch(API_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${authToken}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `Update keys.json - ${new Date().toLocaleString()}`,
+                        content: contentBase64,
+                        sha: sha
+                    })
+                });
+
+                if (!putResponse.ok) throw new Error(`HTTP ${putResponse.status}`);
+            } catch (error) {
+                showToast(`Ошибка сохранения: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+
+        // Показать/скрыть загрузку
+        function showLoading(show) {
+            document.getElementById('loadingState').style.display = show ? 'block' : 'none';
+            document.getElementById('keysTable').style.display = show ? 'none' : 'table';
+        }
+
+        // Показать уведомление
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
