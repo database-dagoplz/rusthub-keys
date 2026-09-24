@@ -19,6 +19,11 @@
       "key": "RUST-YM1K-20261223-B6F2",
       "expires": "2026-12-23",
       "active": true
+    },
+    {
+      "key": "RUST-U909-20261001-OFT8",
+      "expires": "2026-10-01",
+      "active": true
     }
   ]
 }
