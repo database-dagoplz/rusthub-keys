@@ -4,6 +4,11 @@
       "key": "RUST-OQRY-20261024-BTLJ",
       "expires": "2026-10-24",
       "active": true
+    },
+    {
+      "key": "RUST-0PNU-20261223-Z2VK",
+      "expires": "2026-12-23",
+      "active": true
     }
   ]
 }
