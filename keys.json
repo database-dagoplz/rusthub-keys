@@ -1,3 +1,9 @@
 {
-  "keys": []
+  "keys": [
+    {
+      "key": "RUST-OQRY-20261024-BTLJ",
+      "expires": "2026-10-24",
+      "active": true
+    }
+  ]
 }
