@@ -9,6 +9,11 @@
       "key": "RUST-0PNU-20261223-Z2VK",
       "expires": "2026-12-23",
       "active": true
+    },
+    {
+      "key": "RUST-JOLR-20261001-LWN2",
+      "expires": "2026-10-01",
+      "active": true
     }
   ]
 }
