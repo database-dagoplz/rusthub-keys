@@ -9,6 +9,11 @@
       "key": "RUST-UVXV-20261001-OLCS",
       "expires": "2026-10-01",
       "active": true
+    },
+    {
+      "key": "RUST-Y5DC-20261024-6PE7",
+      "expires": "2026-10-24",
+      "active": true
     }
   ]
 }
