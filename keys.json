@@ -1,11 +1,6 @@
 {
   "keys": [
     {
-      "key": "RUST-451D-20261223-MZLT",
-      "expires": "2026-12-23",
-      "active": true
-    },
-    {
       "key": "RUST-NYLE-20261024-43JW",
       "expires": "2026-10-24",
       "active": true
