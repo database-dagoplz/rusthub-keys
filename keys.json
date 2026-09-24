@@ -1,11 +1,6 @@
 {
   "keys": [
     {
-      "key": "RUST-KQWS-20261024-JUVU",
-      "expires": "2026-10-24",
-      "active": true
-    },
-    {
       "key": "RUST-YM1K-20261223-B6F2",
       "expires": "2026-12-23",
       "active": true
