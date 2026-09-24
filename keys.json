@@ -1,9 +1,3 @@
 {
-  "keys": [
-    {
-      "key": "RUST-2026-TEST-KEY2",
-      "expires": "2026-10-01",
-      "active": true
-    }
-  ]
+  "keys": []
 }
