@@ -9,6 +9,11 @@
       "key": "RUST-NYLE-20261024-43JW",
       "expires": "2026-10-24",
       "active": true
+    },
+    {
+      "key": "RUST-KQWS-20261024-JUVU",
+      "expires": "2026-10-24",
+      "active": true
     }
   ]
 }
